@@ -1,58 +1,54 @@
-/* istanbul ignore file */
-import dotenv from "dotenv";
-dotenv.config(); // read ".env"
-
-import http from "http";
-import https from "https";
+import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
+import cors from 'cors';
 
-import { logger } from "./logger";
-import { readFile } from "fs/promises";
-import { prefillDB } from "./prefill";
-import app from "./app";
+require('dotenv').config();
 
-async function setup() {
-    let mongodURI = process.env.DB_CONNECTION_STRING;
-    if (!mongodURI) {
-        logger.error('Cannot start, no database configured. Set environment variable DB_CONNECTION_STRING. Use "memory" for MongoMemoryServer');
-        process.exit(1);
-    }
-    if (mongodURI === "memory") {
-        logger.info("Start MongoMemoryServer");
-        const MMS = await import('mongodb-memory-server');
-        const mongo = await MMS.MongoMemoryServer.create();
-        mongodURI = mongo.getUri();
-    }
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/project')
+  .then(() => console.log('Connected to yourDB-name database'))
+  .catch(err => console.error('Error connecting to database:', err));
 
-    logger.info(`Connect to mongod at ${mongodURI}`);
+// Define the User schema and model
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  lastName: { type: String, required: true },
+  age: { type: Number, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  confirmPassword: { type: String, required: true },
+  date: { type: Date, default: Date.now },
+});
 
-    const options: mongoose.ConnectOptions = {};
+const User = mongoose.model('BookAheadUser', userSchema);
 
-    await mongoose.connect(mongodURI, options);
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-    const port = process.env.HTTP_PORT ? parseInt(process.env.HTTP_PORT) : 3001;
-   // const useSSL = process.env.USE_SSL === 'true';
-   // const httpsPort = parseInt(process.env.HTTPS_PORT!);
+app.get("/", (req: Request, res: Response) => {
+  res.send("App is Working");
+});
 
-    if (process.env.DB_PREFILL === "true") {
-        await prefillDB();
-    }
-    /*
-    if (useSSL) {
-        const [privateSSLKey, publicSSLCert] = await Promise.all([
-            readFile(process.env.SSL_KEY_FILE!),
-            readFile(process.env.SSL_CRT_FILE!)
-        ]);
-        const httpsServer = https.createServer({ key: privateSSLKey, cert: publicSSLCert }, app);
-        httpsServer.listen(httpsPort, () => {
-            logger.info(`Listening for HTTPS at https://localhost:${httpsPort}`);
-        });
-    } else {*/
-        const httpServer = http.createServer(app);
-        httpServer.listen(port, () => {
-            logger.info(`Listening for HTTP at http://localhost:${port}`);
-        });
-    //}
-}
+app.post("/register", async (req: Request, res: Response) => {
+  try {
+    const { name, lastName, age, email, password, confirmPassword } = req.body;
 
-setup();
+    // Create a new user instance
+    const user = new User({ name, lastName, age, email, password, confirmPassword });
+
+    // Save the user to the database
+    await user.save();
+
+    // Send confirmation email
+
+    // Respond with success message
+    res.status(200).json({ message: 'Registration successful, confirmation email sent' });
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.listen(5000, () => console.log("App listening at port 5000"));
