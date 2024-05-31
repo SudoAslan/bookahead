@@ -2,11 +2,11 @@
   "name": "bookahead",
   "version": "1.0.0",
   "description": "[My Awesome Wiki](https://gitlab.bht-berlin.de/s90262/bookahead/-/wikis/Wiki-Page)",
-  "main": "UserRegister.ts",
+  "main": "index.ts",
   "scripts": {
     "test": "jest",
     "tests": "jest",
-    "start": "nodemon src/UserRegister.ts"
+    "start": "nodemon src/index.ts"
   },
   "keywords": [],
   "author": "",
