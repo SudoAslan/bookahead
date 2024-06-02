@@ -162,7 +162,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import userRouter from './router/userRouter';
 import restaurantRouter from './router/restaurantRouter';
-import authRouter from './router/logIn'; // Make sure the path is correct
+import authRouter from "./router/UserLoginRouter";
 
 
 dotenv.config();
@@ -180,7 +180,7 @@ mongoose.connect('mongodb://localhost:27017/Restaurant')
 app.use('/registerOwner', restaurantRouter);
 app.use('/register', userRouter);
 app.use('/login', authRouter);
-
+app.use('/loginowner', authRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`App listening at port ${PORT}`));
