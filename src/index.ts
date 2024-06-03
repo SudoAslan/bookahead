@@ -164,6 +164,7 @@ import userRouter from './router/userRouter';
 import restaurantRouter from './router/restaurantRouter';
 import update from './router/update';
 import login from './router/login';
+import OwnerLoginRouter from './router/OwnerLoginRouter';
 
 
 dotenv.config();
@@ -181,6 +182,7 @@ mongoose.connect('mongodb://localhost:27017/Restaurant')
 app.use('/registerOwner', restaurantRouter);
 app.use('/register', userRouter);
 app.use('/login', login);
+app.use('/login', OwnerLoginRouter);
 app.use('/update',update);
 
 
