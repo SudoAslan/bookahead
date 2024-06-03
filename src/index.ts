@@ -162,7 +162,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import userRouter from './router/userRouter';
 import restaurantRouter from './router/restaurantRouter';
-import authRouter from './router/logIn'; // Make sure the path is correct
+import loginrouter from './router/logIn'; // Make sure the path is correct
+import update from './router/update';
 
 
 dotenv.config();
@@ -179,7 +180,11 @@ mongoose.connect('mongodb://localhost:27017/Restaurant')
 // Router verwenden
 app.use('/registerOwner', restaurantRouter);
 app.use('/register', userRouter);
-app.use('/login', authRouter);
+app.use('/login', loginrouter);
+app.use('/update',update);
+
+
+
 
 
 const PORT = process.env.PORT || 5000;

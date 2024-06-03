@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import User from '../model/User'; // Ensure this is correctly importing your User model
+import User from '../model/User';
 
 const router = express.Router();
 
@@ -19,12 +19,12 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid password' });
     }
 
-    // Send the user's name in the response
-    res.status(200).json({ message: 'Login successful', name: user.name });
+    res.status(200).json({ message: 'Login successful', user });
   } catch (error) {
     console.error('Error logging in user:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 export default router;
