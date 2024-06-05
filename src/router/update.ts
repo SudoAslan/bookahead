@@ -41,7 +41,7 @@ updateRouter.delete('/delete', async (req, res) => {
   const { email } = req.body;
   
   try {
-    const user = await User.findOne({ email }); // Find and delete the user
+    const user = await User.findOneAndDelete({ email }); // Find and delete the user
     if (user) {
       res.status(200).json({ message: 'User profile deleted successfully' });
     } else {
