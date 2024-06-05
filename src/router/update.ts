@@ -2,10 +2,10 @@ import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import User from '../model/User';
 
-const update = express.Router();
+const updateRouter = express.Router();
 
 // Update user information
-update.put('/', async (req: Request, res: Response) => {
+updateRouter.put('/', async (req: Request, res: Response) => {
   try {
     const { email, name ,lastName, password } = req.body;
     const user = await User.findOne({ email });
@@ -37,7 +37,7 @@ update.put('/', async (req: Request, res: Response) => {
 
 
 
-update.delete('/delete', async (req, res) => {
+updateRouter.delete('/delete', async (req, res) => {
   const { email } = req.body;
   
   try {
@@ -53,4 +53,4 @@ update.delete('/delete', async (req, res) => {
   }
 });
 
-export default update;
+export default updateRouter;

@@ -2,9 +2,9 @@ import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import User from '../model/User';
 
-const router = express.Router();
+const Loginrouter = express.Router();
 
-router.post('/', async (req: Request, res: Response) => {
+Loginrouter.post('/', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -27,4 +27,4 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 
-export default router;
+export default Loginrouter;

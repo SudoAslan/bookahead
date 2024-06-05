@@ -162,9 +162,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import userRouter from './router/userRouter';
 import restaurantRouter from './router/restaurantRouter';
-import update from './router/update';
-import login from './router/login';
 import OwnerLoginRouter from './router/OwnerLoginRouter';
+import Loginrouter from './router/login';
+import updateRouter from './router/update';
 
 
 dotenv.config();
@@ -181,9 +181,9 @@ mongoose.connect('mongodb://localhost:27017/Restaurant')
 // Router verwenden
 app.use('/registerOwner', restaurantRouter);
 app.use('/register', userRouter);
-app.use('/loginU', login);
+app.use('/loginU', Loginrouter);
 app.use('/login', OwnerLoginRouter);
-app.use('/update',update);
+app.use('/update',updateRouter);
 
 
 
