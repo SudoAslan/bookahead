@@ -181,7 +181,7 @@ mongoose.connect('mongodb://localhost:27017/Restaurant')
 // Router verwenden
 app.use('/registerOwner', restaurantRouter);
 app.use('/register', userRouter);
-app.use('/login', login);
+app.use('/loginU', login);
 app.use('/login', OwnerLoginRouter);
 app.use('/update',update);
 
