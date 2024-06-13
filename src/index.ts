@@ -156,15 +156,19 @@
 // const PORT = process.env.PORT || 5000;
 // app.listen(PORT, () => console.log(`App listening at port ${PORT}`));
 
+
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import userRouter from './router/userRouter';
 import restaurantRouter from './router/restaurantRouter';
+import update from './router/update';
+import login from './router/login';
 import OwnerLoginRouter from './router/OwnerLoginRouter';
-import Loginrouter from './router/login';
-import updateRouter from './router/update';
+import tableRouter from './router/table';
+
+
 
 
 dotenv.config();
@@ -181,9 +185,13 @@ mongoose.connect('mongodb://localhost:27017/Restaurant')
 // Router verwenden
 app.use('/registerOwner', restaurantRouter);
 app.use('/register', userRouter);
-app.use('/loginU', Loginrouter);
+app.use('/login', login);
+app.use('/update',update);
 app.use('/login', OwnerLoginRouter);
-app.use('/update',updateRouter);
+app.use('/tables', tableRouter);
+
+
+
 
 
 
@@ -191,3 +199,4 @@ app.use('/update',updateRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`App listening at port ${PORT}`));
+
