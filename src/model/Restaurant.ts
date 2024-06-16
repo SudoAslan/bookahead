@@ -7,10 +7,9 @@ const restaurantSchema = new mongoose.Schema({
   city: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  date: { type: Date, default: Date.now },
+  password: { type: String, required: true }
 });
 
-const Restaurant = mongoose.model('Restaurant', restaurantSchema);
+const RestaurantOwner = mongoose.model('RestaurantOwner', restaurantSchema);
 
-export default Restaurant;
+export default RestaurantOwner;

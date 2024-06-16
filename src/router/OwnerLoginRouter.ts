@@ -1,30 +1,28 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import Restaurant from '../model/Restaurant';
+import RestaurantOwner from '../model/Restaurant';
 
-const router = express.Router();
+const OwnerLoginRouter = express.Router();
 
-router.post('/owner', async (req: Request, res: Response) => {
+OwnerLoginRouter.post('/owner', async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
-    const owner = await Restaurant.findOne({ email });
-
+    const owner = await RestaurantOwner.findOne({ email });
     if (!owner) {
-      return res.status(400).json({ message: 'Owner not found' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, owner.password);
-
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Invalid password' });
+    const isMatch = await bcrypt.compare(password, owner.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Send the user's name in the response
-    res.status(200).json({ message: 'Login successful', name: owner.restaurantName });
+    res.json({ id: owner._id, name: owner.restaurantName });
   } catch (error) {
-    console.error('Error logging in user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('Server error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-export default router;
+export default OwnerLoginRouter;

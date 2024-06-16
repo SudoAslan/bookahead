@@ -167,6 +167,10 @@ import update from './router/update';
 import login from './router/login';
 import OwnerLoginRouter from './router/OwnerLoginRouter';
 import tableRouter from './router/table';
+import NewResrouter from './router/newRest';
+import bodyParser from 'body-parser';
+import path from 'path';
+
 
 
 
@@ -176,6 +180,13 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000' // Adjust this to match your frontend URL
+}));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
 
 // MongoDB-Verbindung
 mongoose.connect('mongodb://localhost:27017/Restaurant')
@@ -183,12 +194,14 @@ mongoose.connect('mongodb://localhost:27017/Restaurant')
   .catch(err => console.error('Error connecting to the database:', err));
 
 // Router verwenden
-app.use('/registerOwner', restaurantRouter);
-app.use('/register', userRouter);
-app.use('/loginU', login);
-app.use('/update',update);
-app.use('/login', OwnerLoginRouter);
-app.use('/tables', tableRouter);
+ app.use('/', restaurantRouter);
+// app.use('/register', userRouter);
+// app.use('/loginU', login);
+// app.use('/update',update);
+ app.use('/login', OwnerLoginRouter);
+// app.use('/tables', tableRouter);
+app.use('/restaurants', NewResrouter);
+
 
 
 
