@@ -200,7 +200,7 @@ mongoose.connect('mongodb://localhost:27017/Restaurant')
 app.use('/loginU', login);
  app.use('/update',update);
  app.use('/login', OwnerLoginRouter);
- app.use('/tablesUser', tableRouter);
+//  app.use('/tablesUser', tableRouter);
 app.use('/restaurants', NewResrouter);
 app.use('/tables', OwnerAddTable);
 

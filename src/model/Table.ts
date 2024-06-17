@@ -2,13 +2,12 @@ import mongoose from 'mongoose';
 
 const tableSchema = new mongoose.Schema({
   tableNumber: { type: Number, required: true },
-  assignedUser: { type: String, default: '' },
+  restaurantName: { type: String, required: true },
+  reserved: { type: Boolean, default: false },
+  assignedUser: { type: String, default: null },
   blocked: { type: Boolean, default: false },
-  restaurantName: { type: String, required: true }, // Change to restaurantName field
-  reservationTime: { type: String, default: '' } // New field for reservation time
-
+  reservationTime: { type: String, default: '' },
 });
 
 const Table = mongoose.model('Table', tableSchema);
-
 export default Table;

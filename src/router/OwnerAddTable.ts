@@ -50,4 +50,27 @@ OwnerAddTable.post('/add', async (req, res) => {
     }
   });
 
+  OwnerAddTable.post('/update', async (req, res) => {
+    const { tableNumber, assignedUser, reservationTime, restaurantName } = req.body;
+    try {
+      // Check if the table already exists
+      let table = await Table.findOne({ tableNumber, restaurantName });
+  
+      if (!table) {
+        table = new Table({ tableNumber, restaurantName });
+      }
+  
+      table.assignedUser = assignedUser;
+      table.reservationTime = reservationTime;
+      table.blocked = true;
+  
+      await table.save();
+  
+      res.json(table);
+    } catch (error) {
+      console.error('Error updating table:', error);
+      res.status(500).json({ message: 'Failed to update table' });
+    }
+  });
+
 export default OwnerAddTable;
