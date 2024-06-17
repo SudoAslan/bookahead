@@ -170,6 +170,7 @@ import tableRouter from './router/table';
 import NewResrouter from './router/newRest';
 import bodyParser from 'body-parser';
 import path from 'path';
+import OwnerAddTable from './router/OwnerAddTable';
 
 
 
@@ -183,7 +184,7 @@ app.use(cors());
 app.use(cors({
   origin: 'http://localhost:3000' // Adjust this to match your frontend URL
 }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(bodyParser.urlencoded({ limit: '500mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
@@ -195,12 +196,14 @@ mongoose.connect('mongodb://localhost:27017/Restaurant')
 
 // Router verwenden
  app.use('/', restaurantRouter);
-// app.use('/register', userRouter);
-// app.use('/loginU', login);
-// app.use('/update',update);
+ app.use('/register', userRouter);
+app.use('/loginU', login);
+ app.use('/update',update);
  app.use('/login', OwnerLoginRouter);
-// app.use('/tables', tableRouter);
+ app.use('/tablesUser', tableRouter);
 app.use('/restaurants', NewResrouter);
+app.use('/tables', OwnerAddTable);
+
 
 
 

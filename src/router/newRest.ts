@@ -1,13 +1,13 @@
 import express from 'express';
-import NewRestaurant from '../model/newRestaurant';
 import path from 'path';
 import fs from 'fs';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import NewRestaurant from '../model/newRestaurant';
 
 const NewResrouter = express.Router();
-NewResrouter.use(bodyParser.json({ limit: '10mb' }));
-NewResrouter.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+NewResrouter.use(bodyParser.json({ limit: '500mb' }));
+NewResrouter.use(bodyParser.urlencoded({ extended: true, limit: '500mb' }));
 NewResrouter.use(cors());
 
 interface RestaurantRequest {
@@ -90,6 +90,16 @@ NewResrouter.get('/get', async (req, res) => {
     res.status(200).json(restaurants);
   } catch (error) {
     console.error('Error fetching restaurants:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get all restaurants
+NewResrouter.get('/all', async (req, res) => {
+  try {
+    const restaurants = await NewRestaurant.find();
+    res.json(restaurants);
+  } catch (error) {
     res.status(500).json({ message: 'Internal server error' });
   }
 });

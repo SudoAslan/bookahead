@@ -2,9 +2,9 @@ import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import User from '../model/User';
 
-const router = express.Router();
+const UserRouter = express.Router();
 
-router.post('/', async (req: Request, res: Response) => {
+UserRouter.post('/', async (req: Request, res: Response) => {
   try {
     const { name, lastName, age, email, password, confirmPassword } = req.body;
 
@@ -35,4 +35,4 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-export default router;
+export default UserRouter;

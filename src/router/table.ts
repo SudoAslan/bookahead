@@ -12,19 +12,29 @@ const getRestaurantName = (name: string | ParsedQs | string[] | ParsedQs[]): str
 };
 
 // Get all tables for a specific restaurant
-tableRouter.get('/', async (req: Request, res: Response) => {
-  const { restaurantName } = req.query;
-  if (!restaurantName) {
-    return res.status(400).json({ message: 'Restaurant name is required' });
-  }
+// tableRouter.get('/', async (req: Request, res: Response) => {
+//   const { restaurantName } = req.query;
+//   if (!restaurantName) {
+//     return res.status(400).json({ message: 'Restaurant name is required' });
+//   }
 
+//   try {
+//     const name = getRestaurantName(restaurantName);
+//     const tables = await Table.find({ restaurantName: name });
+//     res.json(tables);
+//   } catch (error) {
+//     console.error('Error fetching tables:', error);
+//     res.status(500).json({ message: 'Error fetching tables' });
+//   }
+// });
+tableRouter.get('/', async (req, res) => {
+  const restaurantName = req.query.restaurantName;
   try {
-    const name = getRestaurantName(restaurantName);
-    const tables = await Table.find({ restaurantName: name });
+    const tables = await Table.find({ restaurantName });
     res.json(tables);
-  } catch (error) {
-    console.error('Error fetching tables:', error);
-    res.status(500).json({ message: 'Error fetching tables' });
+  } catch (err) {
+    console.error('Error fetching tables:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
