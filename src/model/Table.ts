@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 const tableSchema = new mongoose.Schema({
   tableNumber: { type: Number, required: true },
   restaurantName: { type: String, required: true },
-  reserved: { type: Boolean, default: false },
   assignedUser: { type: String, default: null },
   blocked: { type: Boolean, default: false },
   reservationTime: { type: String, default: '' },
