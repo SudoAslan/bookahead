@@ -46,56 +46,40 @@ OwnerAddTable.get('/get', async (req, res) => {
   }
 });
 
-// OwnerAddTable.post('/update', async (req, res) => {
-//   const { tableNumber, assignedUser, reservationTime, restaurantName } = req.body;
-//   try {
-//     let table = await Table.findOne({ tableNumber, restaurantName });
-
-//     if (!table) {
-//       return res.status(404).json({ message: 'Table not found' });
-//     }
-
-//     table.assignedUser = assignedUser;
-//     table.reservationTime = reservationTime;
-//     table.blocked = true;
-
-//     await table.save();
-
-//     res.status(200).json(table); // Ensure the updated table is sent back
-//   } catch (error) {
-//     console.error('Error updating table:', error);
-//     res.status(500).json({ message: 'Failed to update table' });
-//   }
-// });
 OwnerAddTable.post('/update', async (req, res) => {
-    const { tableNumber, assignedUser, reservationTime, restaurantName } = req.body;
-    try {
-      // Check if the user has already reserved a table in this restaurant
-      const existingReservation = await Table.findOne({ restaurantName, assignedUser });
-  
-      if (existingReservation) {
-        return res.status(400).json({ message: 'User has already reserved a table in this restaurant' });
-      }
-  
-      // Update or create table reservation
-      let table = await Table.findOne({ tableNumber, restaurantName });
-  
-      if (!table) {
-        return res.status(404).json({ message: 'Table not found' });
-      }
-  
-      table.assignedUser = assignedUser;
-      table.reservationTime = reservationTime;
-      table.blocked = true;
-  
-      await table.save();
-  
-      res.status(200).json(table); // Ensure the updated table is sent back
-    } catch (error) {
-      console.error('Error updating table:', error);
-      res.status(500).json({ message: 'Failed to update table' });
+  try {
+    const { tableNumber, assignedUser, blocked, reservationTime, restaurantName } = req.body;
+    const table = await Table.findOneAndUpdate(
+      { tableNumber, restaurantName },
+      {
+        assignedUser,
+        blocked,
+        reservationTime
+      },
+      { new: true }
+    );
+
+    if (!table) {
+      return res.status(404).send('Table not found');
     }
-  });
+
+    res.json(table);
+  } catch (error) {
+    res.status(500).send('Server error');
+  }
+});
+
+OwnerAddTable.get('/blocked-tables', async (req, res) => {
+  try {
+    const { userName } = req.query;
+    const blockedTables = await Table.find({ assignedUser: userName, blocked: true });
+    res.json(blockedTables);
+  } catch (error) {
+    console.error('Error fetching blocked tables:', error);
+    res.status(500).send('Server error');
+  }
+});
+
 
 
 
