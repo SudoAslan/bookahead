@@ -17,11 +17,9 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
 app.use(cors({
   origin: 'http://localhost:3000' // Adjust this to match your frontend URL
 }));
-app.use(bodyParser.urlencoded({ limit: '500mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB-Verbindung
@@ -40,4 +38,3 @@ app.use('/tables', OwnerAddTable);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`App listening at port ${PORT}`));
-

@@ -4,10 +4,11 @@ import fs from 'fs';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import NewRestaurant from '../model/newRestaurant';
+import Table from '../model/Table';
 
 const NewResrouter = express.Router();
 NewResrouter.use(bodyParser.json({ limit: '500mb' }));
-NewResrouter.use(bodyParser.urlencoded({ extended: true, limit: '500mb' }));
+NewResrouter.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 NewResrouter.use(cors());
 
 interface RestaurantRequest {
@@ -101,6 +102,29 @@ NewResrouter.get('/all', async (req, res) => {
     res.json(restaurants);
   } catch (error) {
     res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+NewResrouter.delete('/delete/:name', async (req, res) => {
+  try {
+    const restaurantName = req.params.name;
+
+    // Find the restaurant by name
+    const restaurant = await NewRestaurant.findOne({ name: restaurantName });
+    if (!restaurant) {
+      return res.status(404).json({ message: 'Restaurant not found.' });
+    }
+
+    // Delete the restaurant
+    await NewRestaurant.deleteOne({ name: restaurantName });
+
+    // Delete all tables associated with the restaurant
+    await Table.deleteMany({ restaurantName });
+
+    res.status(200).json({ message: 'Restaurant and associated tables deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting restaurant and tables:', error);
+    res.status(500).json({ message: 'Error deleting restaurant and tables.' });
   }
 });
 
