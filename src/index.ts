@@ -8,7 +8,6 @@ import update from './router/update';
 import login from './router/login';
 import OwnerLoginRouter from './router/OwnerLoginRouter';
 import NewResrouter from './router/newRest';
-import bodyParser from 'body-parser';
 import path from 'path';
 import OwnerAddTable from './router/OwnerAddTable';
 

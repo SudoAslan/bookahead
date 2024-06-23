@@ -128,4 +128,29 @@ NewResrouter.delete('/delete/:name', async (req, res) => {
   }
 });
 
+NewResrouter.put('/update/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, description, address, phoneNumber, openingHours, stars, imageUrl } = req.body;
+
+  try {
+    const updatedRestaurant = await NewRestaurant.findByIdAndUpdate(
+      id,
+      { name, description, address, phoneNumber, openingHours, stars, imageUrl },
+      { new: true }
+    );
+
+    if (!updatedRestaurant) {
+      return res.status(404).json({ error: 'Restaurant not found' });
+    }
+
+    console.log('Updated Restaurant:', updatedRestaurant); // Log the updated restaurant
+
+    res.json(updatedRestaurant);
+  } catch (error) {
+    console.error('Error updating restaurant:', error); // Log the error
+    res.status(500).json({ error: 'Error updating restaurant' });
+  }
+});
+
+
 export default NewResrouter;
