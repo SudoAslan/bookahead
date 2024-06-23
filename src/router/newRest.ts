@@ -3,18 +3,35 @@ import path from 'path';
 import fs from 'fs';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import multer from 'multer';
 import NewRestaurant from '../model/newRestaurant';
 import Table from '../model/Table';
 
 const NewResrouter = express.Router();
-NewResrouter.use(bodyParser.json({ limit: '500mb' }));
+NewResrouter.use(bodyParser.json({ limit: '50mb' }));
 NewResrouter.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 NewResrouter.use(cors());
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../uploads/');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + path.extname(file.originalname);
+    cb(null, uniqueSuffix);
+  }
+});
+
+const upload = multer({ storage: storage });
 
 interface RestaurantRequest {
   name: string;
   description: string;
-  imageBase64: string;
   openingHours: string;
   stars: number;
   address: string;
@@ -22,42 +39,21 @@ interface RestaurantRequest {
   ownerName: string;
 }
 
-// Function to save base64 image
-const saveBase64Image = (base64Image: string, filePath: string) => {
-  const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
-  const buffer = Buffer.from(base64Data, 'base64');
-  fs.writeFileSync(filePath, buffer);
-};
-
-// Add new restaurant with base64 image
-NewResrouter.post('/add', async (req, res) => {
+// Add new restaurant with image upload
+NewResrouter.post('/add', upload.single('image'), async (req, res) => {
   try {
-    console.log('Request body:', req.body);  // Log the request body
-
-    const { name, description, imageBase64, openingHours, stars, address, phoneNumber, ownerName }: RestaurantRequest = req.body;
+    const { name, description, openingHours, stars, address, phoneNumber, ownerName }: RestaurantRequest = req.body;
 
     // Ensure all required fields are present
-    if (!name || !description || !imageBase64 || !openingHours || stars === 0 || !address || !phoneNumber || !ownerName) {
+    if (!name || !description || !req.file || !openingHours || stars === 0 || !address || !phoneNumber || !ownerName) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
-
-    // Save base64 image
-    const imageName = `${Date.now()}.png`;
-    const uploadPath = path.join(__dirname, '../uploads/', imageName);
-
-    // Ensure the upload directory exists
-    const uploadDir = path.join(__dirname, '../uploads/');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir);
-    }
-
-    saveBase64Image(imageBase64, uploadPath);
 
     // Save restaurant data along with image path
     const restaurant = new NewRestaurant({
       name,
       description,
-      imageUrl: `/uploads/${imageName}`,
+      imageUrl: `/uploads/${req.file.filename}`,
       openingHours,
       stars,
       address,
@@ -128,14 +124,38 @@ NewResrouter.delete('/delete/:name', async (req, res) => {
   }
 });
 
-NewResrouter.put('/update/:id', async (req, res) => {
+interface UpdatedData {
+  name: string;
+  description: string;
+  address: string;
+  phoneNumber: string;
+  openingHours: string;
+  stars: number;
+  imageUrl?: string; // Optional property
+}
+
+// Update restaurant with optional new image
+NewResrouter.put('/update/:id', upload.single('image'), async (req, res) => {
   const { id } = req.params;
-  const { name, description, address, phoneNumber, openingHours, stars, imageUrl } = req.body;
+  const { name, description, address, phoneNumber, openingHours, stars } = req.body;
 
   try {
+    const updatedData: UpdatedData = {
+      name,
+      description,
+      address,
+      phoneNumber,
+      openingHours,
+      stars,
+    };
+
+    if (req.file) {
+      updatedData.imageUrl = `/uploads/${req.file.filename}`;
+    }
+
     const updatedRestaurant = await NewRestaurant.findByIdAndUpdate(
       id,
-      { name, description, address, phoneNumber, openingHours, stars, imageUrl },
+      updatedData,
       { new: true }
     );
 
@@ -143,14 +163,13 @@ NewResrouter.put('/update/:id', async (req, res) => {
       return res.status(404).json({ error: 'Restaurant not found' });
     }
 
-    console.log('Updated Restaurant:', updatedRestaurant); // Log the updated restaurant
-
     res.json(updatedRestaurant);
   } catch (error) {
-    console.error('Error updating restaurant:', error); // Log the error
+    console.error('Error updating restaurant:', error);
     res.status(500).json({ error: 'Error updating restaurant' });
   }
 });
+
 
 
 export default NewResrouter;
