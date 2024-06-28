@@ -29,6 +29,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Interface for defining the request body structure
 interface RestaurantRequest {
   name: string;
   description: string;
@@ -39,21 +40,26 @@ interface RestaurantRequest {
   ownerName: string;
 }
 
-// Add new restaurant with image upload
-NewResrouter.post('/add', upload.single('image'), async (req, res) => {
+// Route for adding a new restaurant with image upload
+NewResrouter.post('/add', upload.array('images'), async (req, res) => {
   try {
     const { name, description, openingHours, stars, address, phoneNumber, ownerName }: RestaurantRequest = req.body;
 
     // Ensure all required fields are present
-    if (!name || !description || !req.file || !openingHours || stars === 0 || !address || !phoneNumber || !ownerName) {
+    if (!name || !description || !req.files || !openingHours || stars === 0 || !address || !phoneNumber || !ownerName) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // Save restaurant data along with image path
+    // Map uploaded files to image URLs
+    const images = (req.files as Express.Multer.File[]).map(file => ({
+      imageUrl: `/uploads/${file.filename}`
+    }));
+
+    // Save restaurant data along with image paths
     const restaurant = new NewRestaurant({
       name,
       description,
-      imageUrl: `/uploads/${req.file.filename}`,
+      images: images.map(img => img.imageUrl), // Save only the URLs
       openingHours,
       stars,
       address,
@@ -65,7 +71,7 @@ NewResrouter.post('/add', upload.single('image'), async (req, res) => {
     res.status(201).json({ message: 'Restaurant added successfully' });
   } catch (error) {
     console.error('Error adding restaurant:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error' }); // Return a generic error message
   }
 });
 

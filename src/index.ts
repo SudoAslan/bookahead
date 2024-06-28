@@ -10,6 +10,7 @@ import OwnerLoginRouter from './router/OwnerLoginRouter';
 import NewResrouter from './router/newRest';
 import path from 'path';
 import OwnerAddTable from './router/OwnerAddTable';
+import AddImagerouter from './router/imageRouter';
 
 
 dotenv.config();
@@ -27,6 +28,8 @@ mongoose.connect('mongodb://localhost:27017/Restaurant')
   .catch(err => console.error('Error connecting to the database:', err));
 
 // Router verwenden
+app.use('/uploads', express.static('uploads')); // Serve the uploads directory
+
 app.use('/', restaurantRouter);
 app.use('/register', userRouter);
 app.use('/loginU', login);
@@ -34,6 +37,7 @@ app.use('/update', update);
 app.use('/login', OwnerLoginRouter);
 app.use('/restaurants', NewResrouter);
 app.use('/tables', OwnerAddTable);
+app.use('/addGrundriss',AddImagerouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`App listening at port ${PORT}`));
