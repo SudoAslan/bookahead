@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import Image from '../model/Images'; // Adjust import based on your model location
 import multer from 'multer';
+import fs from 'fs';
 import path from 'path';
 
 const AddImagerouter = express.Router();
@@ -29,6 +30,7 @@ AddImagerouter.get('/:restaurantName', async (req: Request, res: Response) => {
   try {
     const image = await Image.findOne({ restaurantName });
     if (image) {
+      res.set('Cache-Control', 'no-store');
       res.status(200).json({ imageUrl: image.imageUrl });
     } else {
       res.status(404).json({ message: 'Image not found' });
@@ -38,42 +40,24 @@ AddImagerouter.get('/:restaurantName', async (req: Request, res: Response) => {
   }
 });
 
-// AddImagerouter.put('/:id', upload.single('image'), async (req: Request, res: Response) => {
-//   try {
-//     const { id } = req.params;
-//     const { restaurantName } = req.body;
 
-//     // Find existing image record by custom id
-//     const existingImage = await Image.findOne({ id, restaurantName });
+AddImagerouter.delete('/:restaurantName', async (req, res) => {
+  const { restaurantName } = req.params;
 
-//     if (!existingImage) {
-//       return res.status(404).json({ message: 'Image not found' });
-//     }
 
-//     // Handle file upload and update logic
-//     const file = req.file;
-//     if (!file) {
-//       return res.status(400).json({ message: 'No file uploaded' });
-//     }
+  try {
+    if(restaurantName){
+      await Image.findOneAndDelete({ restaurantName });
 
-//     // Example: Update image data in MongoDB
-//     const updatedImage = await Image.findOneAndUpdate(
-//       { id, restaurantName },
-//       { $set: { imageUrl: `uploads/${file.filename}` } }, // Update imageUrl field with new file path
-//       { returnOriginal: false }
-//     );
+      res.status(200).json({ message: 'Image and database entry deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'Image not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    res.status(500).json({ message: 'Failed to delete image' });
+  }
+});
 
-//     // Check if updatedImage exists and return updated imageUrl
-//     if (updatedImage) {
-//       res.json({ imageUrl: updatedImage.imageUrl });
-//     } else {
-//       throw new Error('Failed to update image');
-//     }
-
-//   } catch (error) {
-//     console.error('Error updating image:', error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
 
 export default AddImagerouter;
