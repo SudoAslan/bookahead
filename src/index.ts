@@ -12,22 +12,34 @@ import path from 'path';
 import OwnerAddTable from './router/OwnerAddTable';
 import AddImagerouter from './router/imageRouter';
 
-
+// Load environment variables
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3000' // Adjust this to match your frontend URL
+  origin: 'http://localhost:3000' // Adjust this to your frontend URL
 }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static('uploads'));
 
-// MongoDB-Verbindung
-mongoose.connect('mongodb://localhost:27017/Restaurant')
-  .then(() => console.log('Connected to the database'))
-  .catch(err => console.error('Error connecting to the database:', err));
 
-// Router verwenden
+// MongoDB connection
+const mongoUri = process.env.MONGODB_URI;
+if (!mongoUri) {
+  throw new Error('MONGODB_URI is not defined in the environment variables');
+}
+
+mongoose.connect(mongoUri).then(() => {
+  console.log('Connected to MongoDB Atlas');
+  return mongoose.connection;
+}).catch(err => {
+  console.error('Error connecting to MongoDB Atlas:', err);
+  throw err;
+});
+
+
+// Use routers
 app.use('/uploads', express.static('uploads')); // Serve the uploads directory
 
 app.use('/', restaurantRouter);
@@ -37,7 +49,9 @@ app.use('/update', update);
 app.use('/login', OwnerLoginRouter);
 app.use('/restaurants', NewResrouter);
 app.use('/tables', OwnerAddTable);
-app.use('/addGrundriss',AddImagerouter);
+app.use('/addGrundriss', AddImagerouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`App listening at port ${PORT}`));
+
+export default mongoose;

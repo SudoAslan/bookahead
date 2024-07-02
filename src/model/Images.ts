@@ -1,10 +1,15 @@
-// models/Image.js
-import mongoose from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-const AddImageSchema = new mongoose.Schema({
-  restaurantName: String,
-  imageUrl: String, // URL if using cloud storage or path if storing locally
+interface IImage extends Document {
+  restaurantName: string;
+  imageUrl: string;
+}
+
+const imageSchema: Schema = new Schema({
+  restaurantName: { type: String, required: true },
+  imageUrl: { type: String, required: true }
 });
 
-const Image = mongoose.model('Image', AddImageSchema);
+const Image = mongoose.model<IImage>('Image', imageSchema);
+
 export default Image;

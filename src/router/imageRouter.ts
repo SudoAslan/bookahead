@@ -1,12 +1,19 @@
 import express, { Request, Response } from 'express';
-import Image from '../model/Images'; // Adjust import based on your model location
+import Image from '../model/Images';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 
 const AddImagerouter = express.Router();
-const upload = multer({ dest: 'uploads/' });
-
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'src/uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  }
+});
+const upload = multer({ storage });
 AddImagerouter.post('/', upload.single('image'), async (req: Request, res: Response) => {
   const { restaurantName } = req.body;
 
@@ -40,13 +47,20 @@ AddImagerouter.get('/:restaurantName', async (req: Request, res: Response) => {
   }
 });
 
-
-AddImagerouter.delete('/:restaurantName', async (req, res) => {
+AddImagerouter.delete('/:restaurantName', async (req: Request, res: Response) => {
   const { restaurantName } = req.params;
 
-
   try {
-    if(restaurantName){
+    const image = await Image.findOne({ restaurantName });
+    if (image) {
+      // Delete the image file from the uploads directory
+      const filePath = path.join(__dirname, '../..', image.imageUrl); // Adjust the path as needed
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.error('Failed to delete file:', filePath ,err);
+        }
+      });
+
       await Image.findOneAndDelete({ restaurantName });
 
       res.status(200).json({ message: 'Image and database entry deleted successfully' });
@@ -55,9 +69,8 @@ AddImagerouter.delete('/:restaurantName', async (req, res) => {
     }
   } catch (error) {
     console.error('Error deleting image:', error);
-    res.status(500).json({ message: 'Failed to delete image' });
+    res.status(500).json({ message: 'Failed to delete image', error });
   }
 });
-
 
 export default AddImagerouter;
