@@ -21,7 +21,10 @@ app.use(cors({
   origin: 'http://localhost:3000' // Adjust this to your frontend URL
 }));
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use('/uploads', express.static('uploads'));
+
 
 
 // MongoDB connection
@@ -39,8 +42,8 @@ mongoose.connect(mongoUri).then(() => {
 });
 
 
+
 // Use routers
-app.use('/uploads', express.static('uploads')); // Serve the uploads directory
 
 app.use('/', restaurantRouter);
 app.use('/register', userRouter);

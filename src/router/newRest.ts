@@ -11,13 +11,11 @@ const NewResrouter = express.Router();
 NewResrouter.use(bodyParser.json({ limit: '50mb' }));
 NewResrouter.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 NewResrouter.use(cors());
-
-// Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, '../uploads/');
     if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir);
+      fs.mkdirSync(uploadDir, { recursive: true }); // Create directory recursively if it doesn't exist
     }
     cb(null, uploadDir);
   },
@@ -29,33 +27,22 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Interface for defining the request body structure
-interface RestaurantRequest {
-  name: string;
-  description: string;
-  openingHours: string;
-  stars: number;
-  address: string;
-  phoneNumber: string;
-  ownerName: string;
-}
-
 // Route for adding a new restaurant with image upload
 NewResrouter.post('/add', upload.array('images'), async (req, res) => {
   try {
-    const { name, description, openingHours, stars, address, phoneNumber, ownerName }: RestaurantRequest = req.body;
+    const { name, description, openingHours, stars, address, phoneNumber, ownerName } = req.body;
 
     // Ensure all required fields are present
     if (!name || !description || !req.files || !openingHours || stars === 0 || !address || !phoneNumber || !ownerName) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // Map uploaded files to image URLs
+    // Map uploaded files to image URLs with complete file paths
     const images = (req.files as Express.Multer.File[]).map(file => ({
       imageUrl: `/uploads/${file.filename}`
     }));
 
-    // Save restaurant data along with image paths
+    // Save restaurant data along with complete image paths
     const restaurant = new NewRestaurant({
       name,
       description,
@@ -71,13 +58,16 @@ NewResrouter.post('/add', upload.array('images'), async (req, res) => {
     res.status(201).json({ message: 'Restaurant added successfully' });
   } catch (error) {
     console.error('Error adding restaurant:', error);
-    res.status(500).json({ message: 'Internal server error' }); // Return a generic error message
+    res.status(500).json({ message: 'Internal server error' });
   }
-});
+}); 
+
 
 // Get restaurants by owner
 NewResrouter.get('/get', async (req, res) => {
   const { ownerName } = req.query;
+
+  console.log('Owner name:', ownerName);
 
   try {
     if (!ownerName) {
@@ -85,6 +75,8 @@ NewResrouter.get('/get', async (req, res) => {
     }
 
     const restaurants = await NewRestaurant.find({ ownerName });
+
+    console.log('Fetched restaurants:', restaurants);
 
     if (!restaurants || restaurants.length === 0) {
       return res.status(404).json({ message: 'Restaurants not found' });
@@ -96,6 +88,7 @@ NewResrouter.get('/get', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 // Get all restaurants
 NewResrouter.get('/all', async (req, res) => {
