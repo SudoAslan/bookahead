@@ -18,7 +18,8 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3000' // Adjust this to your frontend URL
+  origin: 'https://frontend-five-pi-53.vercel.app', // Adjust this to your frontend URL
+  optionsSuccessStatus: 200 
 }));
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -57,7 +58,7 @@ app.use('/restaurants', NewResrouter);
 app.use('/tables', OwnerAddTable);
 app.use('/addGrundriss', AddImagerouter);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`App listening at port ${PORT}`));
 
 export default mongoose;
