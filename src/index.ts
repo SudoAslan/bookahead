@@ -18,7 +18,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: 'https://frontend-five-pi-53.vercel.app', // Adjust this to your frontend URL
+  origin: 'https://bookahead-tau.vercel.app/', // Adjust this to your frontend URL
   optionsSuccessStatus: 200 
 }));
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
