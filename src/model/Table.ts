@@ -6,6 +6,7 @@ const tableSchema = new mongoose.Schema({
   assignedUser: { type: String, default: null },
   blocked: { type: Boolean, default: false },
   reservationTime: { type: String, default: '' },
+  reservationDate: { type: String, default: '' }, // Add reservationDate field
 });
 
 const Table = mongoose.model('Table', tableSchema);

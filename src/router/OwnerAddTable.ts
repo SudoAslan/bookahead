@@ -48,13 +48,14 @@ OwnerAddTable.get('/get', async (req, res) => {
 
 OwnerAddTable.post('/update', async (req, res) => {
   try {
-    const { tableNumber, assignedUser, blocked, reservationTime, restaurantName } = req.body;
+    const { tableNumber, assignedUser, blocked, reservationTime, restaurantName ,reservationDate} = req.body;
     const table = await Table.findOneAndUpdate(
       { tableNumber, restaurantName },
       {
         assignedUser,
         blocked,
-        reservationTime
+        reservationTime,
+        reservationDate
       },
       { new: true }
     );
@@ -80,7 +81,20 @@ OwnerAddTable.get('/blocked-tables', async (req, res) => {
   }
 });
 
+OwnerAddTable.delete('/delete/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const table = await Table.findByIdAndDelete(id);
 
+    if (!table) {
+      return res.status(404).json({ message: 'Table not found' });
+    }
 
+    res.status(200).json({ message: 'Table deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting table:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 export default OwnerAddTable;
