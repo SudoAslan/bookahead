@@ -3,20 +3,13 @@ import Image from '../model/Images'; // Adjust import based on your model locati
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
 const AddImagerouter = express.Router();
 
-// Configure multer storage to save with unique name
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + path.extname(file.originalname);
-    cb(null, uniqueSuffix);
-  },
-});
 
+// Configure multer storage to save with a unique name
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 AddImagerouter.post('/', upload.single('image'), async (req: Request, res: Response) => {
@@ -26,16 +19,25 @@ AddImagerouter.post('/', upload.single('image'), async (req: Request, res: Respo
     return res.status(400).json({ message: 'No file uploaded.' });
   }
 
-  const imageUrl = `/uploads/${req.file.filename}`;
+  const uniqueName = Date.now() + '.jpg';
+  const imagePath = path.join(__dirname, '../../uploads', uniqueName); // Adjust path as necessary
 
-  const newImage = new Image({ restaurantName, imageUrl });
   try {
+    // Convert the image to JPEG format using sharp
+    await sharp(req.file.buffer)
+      .jpeg()
+      .toFile(imagePath);
+
+    const imageUrl = `/uploads/${uniqueName}`;
+    const newImage = new Image({ restaurantName, imageUrl });
     await newImage.save();
+
     res.status(201).json({ message: 'Image uploaded successfully', imageUrl });
   } catch (error) {
     res.status(500).json({ message: 'Failed to upload image', error });
   }
 });
+
 AddImagerouter.get('/:restaurantName', async (req: Request, res: Response) => {
   const { restaurantName } = req.params;
   try {
