@@ -5,13 +5,15 @@ import fs from 'fs';
 import path from 'path';
 
 const AddImagerouter = express.Router();
-// Configure multer storage to use the original filename
+
+// Configure multer storage to save with unique name
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    const uniqueSuffix = Date.now() + path.extname(file.originalname);
+    cb(null, uniqueSuffix);
   },
 });
 
@@ -24,7 +26,7 @@ AddImagerouter.post('/', upload.single('image'), async (req: Request, res: Respo
     return res.status(400).json({ message: 'No file uploaded.' });
   }
 
-  const imageUrl = `/uploads/${req.file.originalname}`;
+  const imageUrl = `/uploads/${req.file.filename}`;
 
   const newImage = new Image({ restaurantName, imageUrl });
   try {
@@ -34,7 +36,6 @@ AddImagerouter.post('/', upload.single('image'), async (req: Request, res: Respo
     res.status(500).json({ message: 'Failed to upload image', error });
   }
 });
-
 AddImagerouter.get('/:restaurantName', async (req: Request, res: Response) => {
   const { restaurantName } = req.params;
   try {
