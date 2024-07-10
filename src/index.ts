@@ -32,7 +32,7 @@ app.use(bodyParser.json());
 
 app.use(express.json());
 app.use(cors({
-  origin: 'https://bookahead-tau.vercel.app',
+  origin: 'https://bookahead-sand.vercel.app',
   optionsSuccessStatus: 200 
 }));
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

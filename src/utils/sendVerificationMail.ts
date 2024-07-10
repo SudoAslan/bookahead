@@ -9,7 +9,7 @@ const sendVerificationEmail = (user: IUser) => {
     to: user.email,
     subject: 'Please verify your email address',
     html: `<p>Hello ${user.name}, verify your email by clicking this link...</p>
-    <a href = 'https://bookahead-tau.vercel.app/verify-email/${user.emailToken}'>Verify Your
+    <a href = 'https://bookahead-sand.vercel.app/verify-email/${user.emailToken}'>Verify Your
     Email</a>
     `,
   };

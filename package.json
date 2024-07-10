@@ -50,6 +50,7 @@
     "mongoose": "^8.4.4",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.14",
-    "universal-cookie-express": "^7.1.4"
+    "universal-cookie-express": "^7.1.4",
+    "validator": "^13.12.0"
   }
 }
