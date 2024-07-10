@@ -11,14 +11,28 @@ import NewResrouter from './router/newRest';
 import path from 'path';
 import OwnerAddTable from './router/OwnerAddTable';
 import AddImagerouter from './router/imageRouter';
+import bodyParser from 'body-parser';
+import  Cookies  from 'universal-cookie-express';
+import cookieParser from "cookie-parser";
+
+
+
+
 
 // Load environment variables
 dotenv.config();
 
+
 const app = express();
+
+app.use(Cookies());
+app.use(cookieParser());
+app.use(express.json());
+app.use(bodyParser.json());
+
 app.use(express.json());
 app.use(cors({
-  origin: 'https://bookahead-tau.vercel.app', // Adjust this to your frontend URL
+  origin: 'https://bookahead-tau.vercel.app',
   optionsSuccessStatus: 200 
 }));
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -47,10 +61,8 @@ mongoose.connect(mongoUri).then(() => {
 
 
 // Use routers
-
+app.use("/api/users", userRouter);
 app.use('/', restaurantRouter);
-app.use('/register', userRouter);
-app.use('/loginU', login);
 app.use('/update', update);
 app.use('/login', OwnerLoginRouter);
 app.use('/restaurants', NewResrouter);

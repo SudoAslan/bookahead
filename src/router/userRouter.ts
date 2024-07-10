@@ -1,38 +1,18 @@
-import express, { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import User from '../model/User';
+import express, { Router } from "express";
+import {
+  registerUser,
+  loginUser,
+  findUser,
+  getUsers,
+  verifyEmail,
+} from "../Controllers/userController";
 
-const UserRouter = express.Router();
+const router: Router = express.Router();
 
-UserRouter.post('/', async (req: Request, res: Response) => {
-  try {
-    const { name, lastName, age, email, password, confirmPassword } = req.body;
+router.post("/register", registerUser);
+router.post("/login", loginUser);
+router.get("/find/:userId", findUser); // Geschützte Route
+router.get("/", getUsers);
+router.post("/verify-email", verifyEmail);
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email already in use' });
-    }
-
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: 'Passwords do not match' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({
-      name,
-      lastName,
-      age,
-      email,
-      password: hashedPassword,
-    });
-
-    await user.save();
-    res.status(200).json({ message: 'Registration successful, confirmation email sent' });
-  } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-export default UserRouter;
+export default router;
