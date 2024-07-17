@@ -1,4 +1,3 @@
-import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import bodyParser from 'body-parser';
@@ -6,16 +5,19 @@ import cors from 'cors';
 import multer from 'multer';
 import NewRestaurant from '../model/newRestaurant';
 import Table from '../model/Table';
+import express, { Request, Response } from 'express';
 
 const NewResrouter = express.Router();
 NewResrouter.use(bodyParser.json({ limit: '50mb' }));
 NewResrouter.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 NewResrouter.use(cors());
+
+// Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, '../uploads/');
     if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true }); // Create directory recursively if it doesn't exist
+      fs.mkdirSync(uploadDir);
     }
     cb(null, uploadDir);
   },
@@ -27,26 +29,42 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Interface for defining the request body structure
+interface RestaurantRequest {
+  name: string;
+  description: string;
+  openingHours: string;
+  stars: number;
+  address: string;
+  phoneNumber: string;
+  ownerName: string;
+}
+
 // Route for adding a new restaurant with image upload
-NewResrouter.post('/add', upload.array('images'), async (req, res) => {
+NewResrouter.post('/add', upload.fields([{ name: 'images', maxCount: 10 }, { name: 'menuImages', maxCount: 10 }]), async (req, res) => {
   try {
-    const { name, description, openingHours, stars, address, phoneNumber, ownerName } = req.body;
+    const { name, description, openingHours, stars, address, phoneNumber, ownerName }: RestaurantRequest = req.body;
 
     // Ensure all required fields are present
     if (!name || !description || !req.files || !openingHours || stars === 0 || !address || !phoneNumber || !ownerName) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // Map uploaded files to image URLs with complete file paths
-    const images = (req.files as Express.Multer.File[]).map(file => ({
+    // Map uploaded files to image URLs
+    const images = (req.files as { [fieldname: string]: Express.Multer.File[] }).images.map(file => ({
       imageUrl: `/uploads/${file.filename}`
     }));
 
-    // Save restaurant data along with complete image paths
+    const menuImages = (req.files as { [fieldname: string]: Express.Multer.File[] }).menuImages.map(file => ({
+      imageUrl: `/uploads/${file.filename}`
+    }));
+
+    // Save restaurant data along with image paths
     const restaurant = new NewRestaurant({
       name,
       description,
       images: images.map(img => img.imageUrl), // Save only the URLs
+      menuImages: menuImages.map(img => img.imageUrl), // Save only the URLs
       openingHours,
       stars,
       address,
@@ -58,16 +76,13 @@ NewResrouter.post('/add', upload.array('images'), async (req, res) => {
     res.status(201).json({ message: 'Restaurant added successfully' });
   } catch (error) {
     console.error('Error adding restaurant:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error' }); // Return a generic error message
   }
-}); 
-
+});
 
 // Get restaurants by owner
 NewResrouter.get('/get', async (req, res) => {
   const { ownerName } = req.query;
-
-  console.log('Owner name:', ownerName);
 
   try {
     if (!ownerName) {
@@ -75,8 +90,6 @@ NewResrouter.get('/get', async (req, res) => {
     }
 
     const restaurants = await NewRestaurant.find({ ownerName });
-
-    console.log('Fetched restaurants:', restaurants);
 
     if (!restaurants || restaurants.length === 0) {
       return res.status(404).json({ message: 'Restaurants not found' });
@@ -88,7 +101,6 @@ NewResrouter.get('/get', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 // Get all restaurants
 NewResrouter.get('/all', async (req, res) => {
@@ -122,53 +134,5 @@ NewResrouter.delete('/delete/:name', async (req, res) => {
     res.status(500).json({ message: 'Error deleting restaurant and tables.' });
   }
 });
-
-interface UpdatedData {
-  name: string;
-  description: string;
-  address: string;
-  phoneNumber: string;
-  openingHours: string;
-  stars: number;
-  imageUrl?: string; // Optional property
-}
-
-// Update restaurant with optional new image
-NewResrouter.put('/update/:id', upload.single('image'), async (req, res) => {
-  const { id } = req.params;
-  const { name, description, address, phoneNumber, openingHours, stars } = req.body;
-
-  try {
-    const updatedData: UpdatedData = {
-      name,
-      description,
-      address,
-      phoneNumber,
-      openingHours,
-      stars,
-    };
-
-    if (req.file) {
-      updatedData.imageUrl = `/uploads/${req.file.filename}`;
-    }
-
-    const updatedRestaurant = await NewRestaurant.findByIdAndUpdate(
-      id,
-      updatedData,
-      { new: true }
-    );
-
-    if (!updatedRestaurant) {
-      return res.status(404).json({ error: 'Restaurant not found' });
-    }
-
-    res.json(updatedRestaurant);
-  } catch (error) {
-    console.error('Error updating restaurant:', error);
-    res.status(500).json({ error: 'Error updating restaurant' });
-  }
-});
-
-
 
 export default NewResrouter;

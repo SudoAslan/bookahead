@@ -1,13 +1,30 @@
-import mongoose from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
-const tableSchema = new mongoose.Schema({
-  tableNumber: { type: Number, required: true },
-  restaurantName: { type: String, required: true },
-  assignedUser: { type: String, default: null },
-  blocked: { type: Boolean, default: false },
-  reservationTime: { type: String, default: '' },
-  reservationDate: { type: String, default: '' }, // Add reservationDate field
+interface Reservation {
+  _id: Types.ObjectId;
+  user: string;
+  reservationDate: string;
+  reservationTime: string;
+}
+
+interface TableDocument extends Document {
+  tableNumber: number;
+  restaurantName: string;
+  reservations: Types.DocumentArray<Reservation>;
+}
+
+const ReservationSchema = new Schema<Reservation>({
+  user: { type: String, required: true },
+  reservationDate: { type: String, required: true },
+  reservationTime: { type: String, required: true }
 });
 
-const Table = mongoose.model('Table', tableSchema);
+const TableSchema = new Schema<TableDocument>({
+  tableNumber: { type: Number, required: true },
+  restaurantName: { type: String, required: true },
+  reservations: { type: [ReservationSchema], default: [] }
+});
+
+const Table = model<TableDocument>('Table', TableSchema);
+
 export default Table;
